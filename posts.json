@@ -3,17 +3,15 @@
     "id": 1,
     "title": "Welcome",
     "slug": "welcome",
-    "summary": "Static test post loaded from posts.json.",
-    "content": "This is a test post to verify that the site works without a backend.",
+    "summary": "An introduction to this portfolio and what you'll find here.",
     "category": "Blog",
     "createdAt": "2026-02-22T10:00:00.000Z"
   },
   {
     "id": 2,
-    "title": "License Collaboration Network (D3.js)",
-    "slug": "license-collaboration-network",
-    "summary": "Interactive network graph showing collaboration patterns.",
-    "content": "Interactive D3 visualization showing license co-occurrence between projects and contributors.",
+    "title": "Visualizing the consolidation of companies — Exploring Sankey Diagrams",
+    "slug": "company-consolidation-sankey",
+    "summary": "An interactive Sankey diagram showing how companies have been absorbed through mergers and acquisitions.",
     "category": "Visualization",
     "createdAt": "2026-02-20T14:30:00.000Z"
   },
@@ -22,8 +20,15 @@
     "title": "Event: Design Sprint Recap",
     "slug": "design-sprint-recap",
     "summary": "Recap and outcomes from the recent design sprint.",
-    "content": "Summary of activities, decisions, and next steps from the design sprint.",
     "category": "Event",
     "createdAt": "2026-01-15T09:15:00.000Z"
+  },
+  {
+    "id": 4,
+    "title": "My First Post",
+    "slug": "my-first-post",
+    "summary": "Write your summary here.",
+    "category": "Blog",
+    "createdAt": "2026-03-07T10:00:00.000Z"
   }
 ]

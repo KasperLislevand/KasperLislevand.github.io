@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankeydiagram(2018-2025)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i" rel="stylesheet">
+    <style>
+       <style>
+			body {
+				margin: 0;
+				padding: 0;
+				background-color: #f5f5f5;
+				font-family: 'Open Sans', sans-serif;
+				position: relative;
+			}
+
+			#sankey-diagram {
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+				touch-action: pan-x pan-y pinch-zoom; /* Allows pinch-zoom while improving touch behavior */
+			}
+
+			.node-text {
+				pointer-events: none;
+			}
+
+			/* Prevent iOS from automatically enlarging text on orientation change */
+			@media (max-width: 767px) {
+				body {
+					-webkit-text-size-adjust: none;
+				}
+			}
+
+			/* Ensure nodes group is interactive (for hover/click) */
+			.nodes {
+				pointer-events: all;
+			}
+
+			/* Subtle white glow around node labels for better readability over colored links */
+			.node-text {
+				pointer-events: none;
+				paint-order: stroke fill;
+				text-shadow:
+					0 0 4px rgba(255, 255, 255, 0.95),
+					0 0 6px rgba(255, 255, 255, 0.8);
+			}
+</style>
+    </style>
+</head>
+<body>
+    <div id="sankey-diagram"></div>
+    <script>
+        // Embedded JSON data
+        const sankeyData = {
+		  "Main": [
+			{
+			  "comp_id": "AKER BP ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "AKER BP 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "LUNDIN",
+			  "Colors": "E&P",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "AKER BP 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CAPEOMEGA",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "CAPEOMEGA",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CHEVRON",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "CHEVRON",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CONCEDO",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "CONCEDO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+				"comp_id": "PANDION ENERGY",
+				"Colors": "Oil and gas investors",
+				"Color_code": "#E97132",
+				"source": "PANDION ENERGY 2018",
+				"target": "Olje- og gassinvestorer 2018",
+				"value": 1,
+				"node_x": 0
+			},
+			{
+				"comp_id": "PANDION ENERGY",
+				"Colors": "Oil and gas investors",
+				"Color_code": "#E97132",
+				"source": "Olje- og gassinvestorer 2018",
+				"target": "Olje- og gassinvestorer 2025",
+				"value": 1,
+				"node_x": 0.2
+			},
+			{
+				"comp_id": "PANDION ENERGY",
+				"Colors": "Oil and gas investors",
+				"Color_code": "#E97132",
+				"source": "Olje- og gassinvestorer 2025",
+				"target": "PANDION ENERGY 2025",
+				"value": 1,
+				"node_x": 0.6
+			},
+			{
+			  "comp_id": "TOTAL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2018",
+			  "target": "Store europeiske selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CAPRICORN",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "EDISON",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "SOLVEIG GAS",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "SPIRIT ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "SUNCOR ENERGY",
+			  "Colors": "North American oil and gas companies",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "FAROE PETROLEUM",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "DNO",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "DNO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CHRYSAOR",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "CHRYSAOR",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "KISTOS ENERGY",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "KISTOS ENERGY",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "LONGBOAT ENERGY",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "LONGBOAT ENERGY",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "MIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "MIME",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "NEPTUNE ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "NEPTUNE ENERGY",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "ONE-DYAS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "ONE-DYAS",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SOURCE ENERGY",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "SOURCE ENERGY",
+			  "target": "ENTER",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "EQUINOR",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "Norske statseide selskap 2025",
+			  "target": "EQUINOR 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "ENI",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "ENI 2018",
+			  "target": "Store europeiske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SHELL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "SHELL 2018",
+			  "target": "Store europeiske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "TOTAL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "TOTAL 2018",
+			  "target": "Store europeiske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SHELL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2018",
+			  "target": "Store europeiske selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "ENI",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "MAERSK ",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Store europeiske selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "DEA",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "DEA 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "EDISON",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "EDISON 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "ENGIE",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "ENGIE 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "INEOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "INEOS 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "LOTOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "LOTOS 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "MAERSK ",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "MAERSK 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "MOL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "MOL 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "OMV",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "OMV 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "PGNIG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "PGNIG 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "REPSOL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "REPSOL 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SPIRIT ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "SPIRIT ENERGY 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "VNG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "VNG 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "WINTERSHALL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "WINTERSHALL 2018",
+			  "target": "Europeiske industri-/energiselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "INEOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "LOTOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "PGNIG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "OMV",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "REPSOL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "MOL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "LUKOIL",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "PRODUCTION ENERGY COMPANY ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "FORTIS",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "Leteselskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SKAGEN44 ",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "Leteselskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CAPEOMEGA",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SHELL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2025",
+			  "target": "SHELL 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "MAERSK ",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2025",
+			  "target": "TOTAL 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "EXXON MOBIL",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "EXXON MOBIL",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "FORTIS",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "FORTIS",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "WINTERSHALL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "HARBOUR ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "DEA",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "HARBOUR ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CHRYSAOR",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "HARBOUR ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "INPEX",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2025",
+			  "target": "INPEX IDEMITSU 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "IDEMITSU",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2025",
+			  "target": "INPEX IDEMITSU 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "IDEMITSU",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "IDEMITSU 2018",
+			  "target": "Internasjonale olje- og gasselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "INPEX",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "INPEX 2018",
+			  "target": "Internasjonale olje- og gasselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "KUFPEC",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "KUFPEC 2018",
+			  "target": "Internasjonale olje- og gasselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "LUKOIL",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "LUKOIL 2018",
+			  "target": "Internasjonale olje- og gasselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "LONGBOAT ENERGY",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "ENTER",
+			  "target": "Internasjonale olje- og gasselskap 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "KUFPEC",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2018",
+			  "target": "Europeiske industri-/energiselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "INPEX",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2018",
+			  "target": "Internasjonale olje- og gasselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "IDEMITSU",
+			  "Colors": "International oil and gas companies",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2018",
+			  "target": "Internasjonale olje- og gasselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "LONGBOAT ENERGY",
+			  "Colors": "E&P",
+			  "Color_code": "#387D23",
+			  "source": "Internasjonale olje- og gasselskap 2025",
+			  "target": "JAPEX NORGE 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "MIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "KISTOS ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "KISTOS ENERGY",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "KISTOS ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CAPRICORN",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "CAPRICORN 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "DNO",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "DNO 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "FAROE PETROLEUM",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "FAROE PETROLEUM 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "M VEST ENERGY ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "M VEST ENERGY 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "PETROLIA ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "PETROLIA 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "PRODUCTION ENERGY COMPANY ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "PRODUCTION E.C  2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "EDISON",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SPIRIT ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CAPRICORN",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "FAROE PETROLEUM",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "DNO",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "M VEST ENERGY ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "PETROLIA ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CONCEDO",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "Leteselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SOLVEIG GAS",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SUNCOR ENERGY",
+			  "Colors": "North American oil and gas companies",
+			  "Color_code": "#B4E5A2",
+			  "source": "Nordamerikanske olje- og gasselskap 2018",
+			  "target": "Lete- og produksjonsselskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CONCEDO",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "CONCEDO 2018",
+			  "target": "Leteselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "FORTIS",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "FORTIS 2018",
+			  "target": "Leteselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SKAGEN44 ",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "SKAGEN44  2018",
+			  "target": "Leteselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SOURCE ENERGY",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "ENTER",
+			  "target": "Leteselskap 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "LIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "LIME 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "LUKOIL",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "LUKOIL",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "M VEST ENERGY ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "M VEST ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "MOL",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "MOL",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "LUNDIN",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "LUNDIN 2018",
+			  "target": "Lete- og produksjonsselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "AKER BP ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "PETORO",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "Norske statseide selskap 2018",
+			  "target": "Norske statseide selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "EQUINOR",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "Norske statseide selskap 2018",
+			  "target": "Norske statseide selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SUNCOR ENERGY",
+			  "Colors": "North American oil and gas companies",
+			  "Color_code": "#B4E5A2",
+			  "source": "SUNCOR ENERGY 2018",
+			  "target": "Nordamerikanske olje- og gasselskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "AKER BP ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "AKER BP 2018",
+			  "target": "Norske olje- og gasspesialister 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "OKEA ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "OKEA 2018",
+			  "target": "Norske olje- og gasspesialister 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "NEPTUNE ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "ENTER",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "TOTAL",
+			  "Colors": "European majors",
+			  "Color_code": "#8ED973",
+			  "source": "Store europeiske selskap 2025",
+			  "target": "TOTAL 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "ENGIE",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "VNG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "LUNDIN",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "OKEA ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "POINT RESOURCES",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2018",
+			  "target": "Norske olje- og gasspesialister 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "EQUINOR",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "EQUINOR 2018",
+			  "target": "Norske statseide selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "PETORO",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "PETORO 2018",
+			  "target": "Norske statseide selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "CHRYSAOR",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "ENTER",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "MIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "ENTER",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "ONE-DYAS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "ENTER",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "KISTOS ENERGY",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "ENTER",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.2
+			},
+			{
+			  "comp_id": "WINTERSHALL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "DEA",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2018",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "LIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2018",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "WELLESLEY ",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2018",
+			  "target": "Olje- og gassinvestorer 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "OKEA ",
+			  "Colors": "Norwegian oil and gas specialists",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "OKEA 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CAPEOMEGA",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "CAPEOMEGA 2018",
+			  "target": "Olje- og gassinvestorer 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "LIME",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "LIME 2018",
+			  "target": "Olje- og gassinvestorer 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "POINT RESOURCES",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "POINT RESOURCES 2018",
+			  "target": "Olje- og gassinvestorer 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "SOLVEIG GAS",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "SOLVEIG GAS 2018",
+			  "target": "Olje- og gassinvestorer 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "WELLESLEY ",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "WELLESLEY 2018",
+			  "target": "Olje- og gassinvestorer 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "OMV",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "OMV 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "INEOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "ORLEN 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "LOTOS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "ORLEN 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "PGNIG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "ORLEN 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "KUFPEC",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "ORLEN 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "ONE-DYAS",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "PANDION ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "PETORO",
+			  "Colors": "Norwegian state companies",
+			  "Color_code": "#084F6A",
+			  "source": "Norske statseide selskap 2025",
+			  "target": "PETORO 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "PETROLIA ",
+			  "Colors": "E&P",
+			  "Color_code": "#CAEEFB",
+			  "source": "Lete- og produksjonsselskap 2025",
+			  "target": "PETROLIA 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "PRODUCTION ENERGY COMPANY ",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "PRODUCTION E.C",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "REPSOL",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#FFC000",
+			  "source": "Europeiske industri-/energiselskap 2025",
+			  "target": "REPSOL 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "CHEVRON",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "Store amerikanske selskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "SKAGEN44 ",
+			  "Colors": "EXIT",
+			  "Color_code": "#FF0000",
+			  "source": "EXIT",
+			  "target": "SKAGEN44 ",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "SOURCE ENERGY",
+			  "Colors": "Exploration companies",
+			  "Color_code": "#96DCF8",
+			  "source": "Leteselskap 2025",
+			  "target": "SOURCE ENERGY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "EXXON MOBIL",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "Store amerikanske selskap 2018",
+			  "target": "EXIT",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CONOCOPHILLIPS ",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "Store amerikanske selskap 2018",
+			  "target": "Store amerikanske selskap 2025",
+			  "value": 1,
+			  "node_x": 0.4
+			},
+			{
+			  "comp_id": "CHEVRON",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "CHEVRON 2018",
+			  "target": "Store amerikanske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "CONOCOPHILLIPS ",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "CONOCOPHILLIPS 2018",
+			  "target": "Store amerikanske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "EXXON MOBIL",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "EXXON MOBIL 2018",
+			  "target": "Store amerikanske selskap 2018",
+			  "value": 1,
+			  "node_x": 0.0
+			},
+			{
+			  "comp_id": "CONOCOPHILLIPS ",
+			  "Colors": "US majors",
+			  "Color_code": "#4EA72E",
+			  "source": "Store amerikanske selskap 2025",
+			  "target": "CONOCOPHILLIPS 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "ENGIE",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "V\u00c5R ENERGI 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "VNG",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "V\u00c5R ENERGI 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "POINT RESOURCES",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "V\u00c5R ENERGI 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "ENI",
+			  "Colors": "European majors",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "V\u00c5R ENERGI 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "NEPTUNE ENERGY",
+			  "Colors": "European industrialists/energy companies",
+			  "Color_code": "#0F9ED5",
+			  "source": "Norske olje- og gasspesialister 2025",
+			  "target": "V\u00c5R ENERGI 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			},
+			{
+			  "comp_id": "WELLESLEY ",
+			  "Colors": "Oil and gas investors",
+			  "Color_code": "#E97132",
+			  "source": "Olje- og gassinvestorer 2025",
+			  "target": "WELLESLEY 2025",
+			  "value": 1,
+			  "node_x": 0.6
+			}
+		  ],
+		  "Fargekoder": [
+			{
+			  "Node": "ENTER",
+			  "node_color": "#2ECC40"
+			},
+			{
+			  "Node": "Store europeiske selskap 2018",
+			  "node_color": "#8ED973"
+			},
+			{
+			  "Node": "Store europeiske selskap 2025",
+			  "node_color": "#8ED973"
+			},
+			{
+			  "Node": "Europeiske industri-/energiselskap 2018",
+			  "node_color": "#FFC000"
+			},
+			{
+			  "Node": "Europeiske industri-/energiselskap 2025",
+			  "node_color": "#FFC000"
+			},
+			{
+			  "Node": "EXIT",
+			  "node_color": "#FF0000"
+			},
+			{
+			  "Node": "Internasjonale olje- og gasselskap 2018",
+			  "node_color": "#387D23"
+			},
+			{
+			  "Node": "Internasjonale olje- og gasselskap 2025",
+			  "node_color": "#387D23"
+			},
+			{
+			  "Node": "Lete- og produksjonsselskap 2018",
+			  "node_color": "#CAEEFB"
+			},
+			{
+			  "Node": "Lete- og produksjonsselskap 2025",
+			  "node_color": "#CAEEFB"
+			},
+			{
+			  "Node": "Leteselskap 2018",
+			  "node_color": "#96DCF8"
+			},
+			{
+			  "Node": "Leteselskap 2025",
+			  "node_color": "#96DCF8"
+			},
+			{
+			  "Node": "Nordamerikanske olje- og gasselskap 2018",
+			  "node_color": "#B4E5A2"
+			},
+			{
+			  "Node": "Norske olje- og gasspesialister 2018",
+			  "node_color": "#0F9ED5"
+			},
+			{
+			  "Node": "Norske olje- og gasspesialister 2025",
+			  "node_color": "#0F9ED5"
+			},
+			{
+			  "Node": "Norske statseide selskap 2018",
+			  "node_color": "#084F6A"
+			},
+			{
+			  "Node": "Norske statseide selskap 2025",
+			  "node_color": "#084F6A"
+			},
+			{
+			  "Node": "Olje- og gassinvestorer 2018",
+			  "node_color": "#E97132"
+			},
+			{
+			  "Node": "Olje- og gassinvestorer 2025",
+			  "node_color": "#E97132"
+			},
+			{
+			  "Node": "Store amerikanske selskap 2018",
+			  "node_color": "#4EA72E"
+			},
+			{
+			  "Node": "Store amerikanske selskap 2025",
+			  "node_color": "#4EA72E"
+			}
+		  ]
+        };
+
+function loadAndRenderSankey() {
+    const width = window.innerWidth;
+
+    // Detect mobile: typically < 768px (you can adjust this breakpoint)
+    const isMobile = width < 768;
+
+    // Base config – shared values
+    const baseConfig = {
+        baseMargin: 40,
+        labelPadding: 12,
+        topMarginBase: 60,
+        nodeWidth: 15,
+        nodePadding: 13,
+        nodePaddingNoMiddle: 15,
+        minLinkWidth: 3,
+        baseFontSizeVw: 1.6,
+        maxFontSize: 16,
+        baseTitleFontSizeVw: 2.8,
+        maxTitleFontSize: 28,
+        defaultNodeColor: '#808080',
+        enterNodeColor: '#2ecc40',
+        nodeStrokeColor: 'white',
+        nodeStrokeWidth: 1,
+        titleText: 'Sankeydiagram (2018-2025)',
+        fontFamily: "'Open Sans', sans-serif",
+        textColor: '#1a1a1a',
+        leftNodePadding00: 14,
+        leftNodePadding025: 55,
+        rightNodePadding075: 50,
+        rightNodePadding10: 18,
+        depth1X: 0,
+        depth2X: 0.25,
+        depth3X: 0.75,
+        depth4X: 1.0,
+        lineColor: '#D3D3D3',
+        lineThickness: 8,
+        lineDash: '20,20',
+        yearLabelColor: '#1a1a1a',
+        yearLabelFontWeight: 'bold',
+        maxNodeLabelFontSize: 16,
+        fixedLinkWidth: null,
+        linkWidthScale: 1.2,
+    };
+
+    // Mobile-specific overrides
+    const mobileOverrides = {
+        baseMargin: 20,                  // Less horizontal margin
+        labelPadding: 8,
+        topMarginBase: 80,               // More space at top for title + year labels
+        nodePadding: 20,                 // More vertical breathing room between nodes
+        nodePaddingNoMiddle: 1,
+        minLinkWidth: 4,
+        baseFontSizeVw: 1.6,             // Slightly larger base (vw-based, but capped)
+        maxNodeLabelFontSize: 13,        // Smaller max font on mobile to prevent overflow
+        maxFontSize: 12,
+        baseTitleFontSizeVw: 3.8,         // Larger title on mobile (more prominent)
+        maxTitleFontSize: 24,
+        yearLabelFontSize: 22,           // Smaller year labels to fit
+        linkWidthScale: 1.1,             // Thicker links for touch visibility
+        leftNodePadding00: 14,           // More vertical spacing on left
+        leftNodePadding025: 60,
+        rightNodePadding075: 60,
+        rightNodePadding10: 15,
+        depth2X: 0.28,                   // Slightly wider spacing between columns
+        depth3X: 0.72,
+        lineThickness: 4,
+    };
+
+    // Desktop-specific tweaks (optional – can refine further)
+    const desktopOverrides = {
+        yearLabelFontSize: 28,
+        linkWidthScale: 1.2,
+        depth2X: 0.25,
+        depth3X: 0.75,
+        lineThickness: 8,
+    };
+
+    // Merge: base + mobile or desktop overrides
+    const config = {
+        ...baseConfig,
+        ...(isMobile ? mobileOverrides : desktopOverrides),
+        yearLabelFontSize: isMobile ? mobileOverrides.yearLabelFontSize : desktopOverrides.yearLabelFontSize,
+    };
+
+    // Force smaller year labels on very small screens
+    if (width < 480) {
+        config.yearLabelFontSize = 18;
+        config.maxNodeLabelFontSize = 12;
+        config.topMarginBase = 90;
+    }
+    // Define manual sorting orders for depth 2 and 3
+    const depth2Order = [
+        "ENTER",
+        "Nordamerikanske olje- og gasselskap 2018",
+        "Lete- og produksjonsselskap 2018",
+        "Olje- og gassinvestorer 2018",
+        "Norske olje- og gasspesialister 2018",
+        "Internasjonale olje- og gasselskap 2018",
+        "Store europeiske selskap 2018",
+        "Norske statseide selskap 2018",
+        "Leteselskap 2018",
+        "Store amerikanske selskap 2018",
+        "Europeiske industri-/energiselskap 2018"
+    ];
+    const depth3Order = [
+        "Lete- og produksjonsselskap 2025",
+        "Olje- og gassinvestorer 2025",
+        "Norske olje- og gasspesialister 2025",
+        "Europeiske industri-/energiselskap 2025",
+        "Internasjonale olje- og gasselskap 2025",
+        "Store europeiske selskap 2025",
+        "Norske statseide selskap 2025",
+        "Leteselskap 2025",
+        "Store amerikanske selskap 2025",
+        "EXIT"
+    ];
+    // Process embedded data
+    try {
+        const mainData = sankeyData.Main;
+        const fargekoderData = sankeyData.Fargekoder;
+        // Create node color map
+        const nodeColorMap = {};
+        fargekoderData.forEach(item => {
+            if (item.Node && item.node_color) {
+                nodeColorMap[item.Node] = item.node_color;
+            }
+        });
+        // Fill missing color codes
+        mainData.forEach(row => {
+            row.Color_code = row.Color_code || config.defaultNodeColor;
+        });
+        // Get unique nodes
+        const allNodes = [...new Set([...mainData.map(row => row.source), ...mainData.map(row => row.target)])];
+        // Prepare nodes and links
+        const nodes = allNodes.map(name => ({ name }));
+        let links = mainData.map((row, index) => ({
+            source: row.source,
+            target: row.target,
+            value: row.value,
+            color: row.Color_code,
+            comp_id: row.comp_id || '',
+            originalIndex: index
+        }));
+        // Assign node colors
+        function getNodeClassification(nodeName) {
+            const match = mainData.find(row => row.source === nodeName || row.target === nodeName);
+            return match ? match.Color_code : config.defaultNodeColor;
+        }
+        nodes.forEach(node => {
+            if (node.name in nodeColorMap) {
+                node.color = nodeColorMap[node.name];
+            } else if (node.name === 'ENTER') {
+                node.color = config.enterNodeColor;
+            } else {
+                node.color = getNodeClassification(node.name);
+            }
+        });
+        // Compute comp_id associations for nodes
+        const nodeToCompids = {};
+        allNodes.forEach(node => nodeToCompids[node] = new Set());
+        mainData.forEach(row => {
+            if (row.comp_id) {
+                nodeToCompids[row.source].add(row.comp_id);
+                nodeToCompids[row.target].add(row.comp_id);
+            }
+        });
+        nodes.forEach(node => {
+            node.compIds = Array.from(nodeToCompids[node.name]);
+        });
+        // Temp sankey to get depths and links for group key assignment
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const tempSankey = d3.sankey()
+            .nodeId(d => d.name)
+            .nodeAlign(d3.sankeyJustify)
+            .nodeWidth(config.nodeWidth)
+            .nodePadding(config.nodePadding)
+            .extent([[0, 0], [width, height]]);
+        const tempGraph = tempSankey({
+            nodes: nodes.map(d => ({ ...d })),
+            links: links.map(d => ({ ...d }))
+        });
+        // Group by depth to find maxDepth
+        const nodesByDepth = {};
+        tempGraph.nodes.forEach(node => {
+            const depth = node.depth;
+            if (!nodesByDepth[depth]) nodesByDepth[depth] = [];
+            nodesByDepth[depth].push(node);
+        });
+        const maxDepth = Math.max(...Object.keys(nodesByDepth).map(Number));
+        // Assign groupKey to original nodes based on tempGraph
+        const nodeMap = new Map(tempGraph.nodes.map(node => [node.name, node]));
+        nodes.forEach(node => {
+            const tempNode = nodeMap.get(node.name);
+            node.groupKey = '';
+            if (tempNode.depth === 0 && tempNode.sourceLinks.length > 0) {
+                const maxValue = d3.max(tempNode.sourceLinks, link => link.value);
+                const primaryLink = tempNode.sourceLinks.find(link => link.value === maxValue) || tempNode.sourceLinks[0];
+                node.groupKey = primaryLink.target.name;
+            } else if (tempNode.depth === maxDepth && tempNode.targetLinks.length > 0) {
+                const maxValue = d3.max(tempNode.targetLinks, link => link.value);
+                const primaryLink = tempNode.targetLinks.find(link => link.value === maxValue) || tempNode.targetLinks[0];
+                node.groupKey = primaryLink.source.name;
+            }
+        });
+        // Store nodes, links, and config globally for resize
+        window.nodes = nodes;
+        window.links = links;
+        window.config = config;
+        window.depth2Order = depth2Order;
+        window.depth3Order = depth3Order;
+        // Render the diagram
+        renderSankey(nodes, links, config, depth2Order, depth3Order);
+    } catch (err) {
+        console.error("Error in loadAndRenderSankey:", err);
+    }
+}
+
+// -----------------------------------------------------------------
+// renderSankey FUNCTION (moved OUTSIDE loadAndRenderSankey)
+// -----------------------------------------------------------------
+function renderSankey(nodes, links, config, depth2Order, depth3Order) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // ---------- SVG SETUP ----------
+    const svg = d3.select("#sankey-diagram").select("svg");
+    if (svg.empty()) {
+        d3.select("#sankey-diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", `0 0 ${width} ${height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("max-width", "100%")
+            .style("height", "auto");
+    }
+    const currentSvg = d3.select("#sankey-diagram svg");
+    currentSvg
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", `0 0 ${width} ${height}`);
+    currentSvg.selectAll("*").remove();
+
+    // ---------- FONT & LINK SIZES ----------
+    const vw = width / 100;
+
+    // 1. Node-label font size – capped by config
+    const labelFontSize = Math.min(
+        config.baseFontSizeVw * vw,
+        config.maxNodeLabelFontSize,
+        config.maxFontSize
+    );
+    const titleFontSize = Math.min(
+        config.baseTitleFontSizeVw * vw,
+        config.maxTitleFontSize
+    );
+
+    // 2. Helper to get the **final** link width (fixed OR flow-based)
+    const getLinkWidth = d => {
+        // Optionally force a constant width
+        if (config.fixedLinkWidth !== null && config.fixedLinkWidth !== undefined) {
+            return config.fixedLinkWidth;
+        }
+        const scale = (config.linkWidthScale ?? 1.0);
+        const dynamicWidth = d.width * scale;
+        return Math.max(config.minLinkWidth, dynamicWidth);
+    };
+
+    // ---------- TEMP LAYOUT (depths, groupKey, etc.) ----------
+    const tempSankey = d3.sankey()
+        .nodeId(d => d.name)
+        .nodeAlign(d3.sankeyJustify)
+        .nodeWidth(config.nodeWidth)
+        .nodePadding(config.nodePadding)
+        .extent([[0, 0], [width, height]]);
+
+    const tempGraph = tempSankey({
+        nodes: nodes.map(d => ({ ...d })),
+        links: links.map(d => ({ ...d }))
+    });
+
+    // displayNames maps stripped names (no year suffix)
+    const displayNames = new Map();
+    tempGraph.nodes.forEach(d => {
+        displayNames.set(d.name, d.name.replace(/ 2018$| 2025$/, ""));
+    });
+
+    // Group by depth
+    const nodesByDepth = {};
+    tempGraph.nodes.forEach(node => {
+        const depth = node.depth;
+        if (!nodesByDepth[depth]) nodesByDepth[depth] = [];
+        nodesByDepth[depth].push(node);
+    });
+    const maxDepth = Math.max(...Object.keys(nodesByDepth).map(Number));
+
+    // ---------- TEXT MEASUREMENT ----------
+    const tempText = currentSvg.append("text")
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${labelFontSize}px`)
+        .style("font-weight", "bold")
+        .style("visibility", "hidden");
+    const getTextWidth = text => {
+        tempText.text(text);
+        return tempText.node().getBBox().width;
+    };
+    let leftMaxWidth = 0, rightMaxWidth = 0;
+    if (nodesByDepth[0]) {
+        nodesByDepth[0].forEach(n => {
+            leftMaxWidth = Math.max(leftMaxWidth, getTextWidth(displayNames.get(n.name)));
+        });
+    }
+    if (nodesByDepth[maxDepth]) {
+        nodesByDepth[maxDepth].forEach(n => {
+            rightMaxWidth = Math.max(rightMaxWidth, getTextWidth(displayNames.get(n.name)));
+        });
+    }
+    tempText.remove();
+    // ---------- MARGINS ----------
+    const leftMargin = leftMaxWidth + config.labelPadding + config.baseMargin;
+    const rightMargin = rightMaxWidth + config.labelPadding + config.baseMargin;
+    const labelHeightApprox = labelFontSize * 1.2; // <-- use labelFontSize
+    let topMargin = config.topMarginBase;
+    let bottomMargin = config.baseMargin;
+    const hasMiddle = Object.keys(nodesByDepth).length > 2;
+    if (hasMiddle) topMargin += labelHeightApprox + config.labelPadding;
+    const nodePadding = hasMiddle ? config.nodePadding : config.nodePaddingNoMiddle;
+    // ---------- REAL SANKEY ----------
+    const sankeyGen = d3.sankey()
+        .nodeId(d => d.name)
+        .nodeAlign(d3.sankeyJustify)
+        .nodeWidth(config.nodeWidth)
+        .nodePadding(nodePadding)
+        .nodeSort((a, b) => {
+            if (a.depth === 1 && b.depth === 1) return depth2Order.indexOf(a.name) - depth2Order.indexOf(b.name);
+            if (a.depth === 2 && b.depth === 2) return depth3Order.indexOf(a.name) - depth3Order.indexOf(b.name);
+            const orderA = a.depth === 0 ? depth2Order.indexOf(a.groupKey) : depth3Order.indexOf(a.groupKey);
+            const orderB = a.depth === 0 ? depth2Order.indexOf(b.groupKey) : depth3Order.indexOf(b.groupKey);
+            return orderA - orderB || d3.ascending(a.name, b.name);
+        })
+        .extent([[leftMargin, topMargin], [width - rightMargin, height - bottomMargin]]);
+    sankeyGen.linkSort((a, b) => d3.ascending(a.comp_id, b.comp_id));
+    const graph = sankeyGen({ nodes: nodes.map(d => ({ ...d })), links: links.map(d => ({ ...d })) });
+    // ---------- X-POSITION SCALING ----------
+    const depthXMap = { 0: config.depth1X, 1: config.depth2X, 2: config.depth3X, 3: config.depth4X };
+    const totalXRange = config.depth4X - config.depth1X;
+    const sankeyWidth = (width - rightMargin) - leftMargin;
+    graph.nodes.forEach(node => {
+        const normalizedX = (depthXMap[node.depth] - config.depth1X) / totalXRange;
+        node.x0 = leftMargin + normalizedX * sankeyWidth;
+        node.x1 = node.x0 + config.nodeWidth;
+    });
+    // ---------- Y-POSITION & COLUMN ALIGNMENT ----------
+    const graphNodesByDepth = {};
+    graph.nodes.forEach(node => {
+        const depth = node.depth;
+        if (!graphNodesByDepth[depth]) graphNodesByDepth[depth] = [];
+        graphNodesByDepth[depth].push(node);
+    });
+    const graphMaxDepth = Math.max(...Object.keys(graphNodesByDepth).map(Number));
+    const extentTop = topMargin, extentBottom = height - bottomMargin;
+    const availableHeight = extentBottom - extentTop;
+    Object.keys(graphNodesByDepth).forEach(depthStr => {
+        const depth = Number(depthStr);
+        let column = graphNodesByDepth[depth];
+        // sorting same as before …
+        if (depth === 0) column.sort((a, b) => depth2Order.indexOf(a.groupKey) - depth2Order.indexOf(b.groupKey) || d3.ascending(a.name, b.name));
+        else if (depth === 1) column.sort((a, b) => depth2Order.indexOf(a.name) - depth2Order.indexOf(b.name));
+        else if (depth === graphMaxDepth - 1) column.sort((a, b) => depth3Order.indexOf(a.name) - depth3Order.indexOf(b.name));
+        else if (depth === graphMaxDepth) column.sort((a, b) => depth3Order.indexOf(a.groupKey) - depth3Order.indexOf(b.groupKey) || d3.ascending(a.name, b.name));
+        let totalHeight = 0;
+        column.forEach(n => totalHeight += n.y1 - n.y0);
+        const gaps = column.length - 1;
+        const padding = depth === 0 ? config.leftNodePadding00 :
+                       depth === 1 ? config.leftNodePadding025 :
+                       depth === graphMaxDepth - 1 ? config.rightNodePadding075 :
+                       config.rightNodePadding10;
+        const totalPadding = gaps * padding;
+        const startY = extentTop + (availableHeight - totalHeight - totalPadding) / 2;
+        let curY = startY;
+        column.forEach(n => {
+            const h = n.y1 - n.y0;
+            n.y0 = curY;
+            n.y1 = curY + h;
+            curY += h + padding;
+        });
+    });
+	
+	// After adjusting all node.y0 / node.y1 and node.x0 / node.x1:
+	sankeyGen.update(graph);
+
+	
+    // ---------- TITLE, DOTTED LINE, YEAR LABELS ----------
+    currentSvg.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2).attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${titleFontSize}px`)
+        .style("font-weight", "bold")
+        .style("fill", config.textColor)
+        .text(config.titleText);
+    const midX = leftMargin + 0.5 * sankeyWidth;
+    currentSvg.append("line")
+        .attr("x1", midX).attr("y1", extentTop)
+        .attr("x2", midX).attr("y2", extentBottom)
+        .attr("stroke", config.lineColor)
+        .attr("stroke-width", config.lineThickness)
+        .attr("stroke-dasharray", config.lineDash);
+    const yearX2018 = leftMargin + (config.depth2X - config.depth1X) / totalXRange * sankeyWidth;
+    const yearX2025 = leftMargin + (config.depth3X - config.depth1X) / totalXRange * sankeyWidth;
+    currentSvg.append("text")
+        .attr("x", yearX2018 + config.nodeWidth / 2).attr("y", extentTop)
+        .attr("text-anchor", "middle")
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${config.yearLabelFontSize}px`)
+        .style("font-weight", config.yearLabelFontWeight)
+        .style("fill", config.yearLabelColor)
+        .text("2018");
+    currentSvg.append("text")
+        .attr("x", yearX2025 + config.nodeWidth / 2).attr("y", extentTop)
+        .attr("text-anchor", "middle")
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${config.yearLabelFontSize}px`)
+        .style("font-weight", config.yearLabelFontWeight)
+        .style("fill", config.yearLabelColor)
+        .text("2025");
+    // ---------- LINKS ----------
+    const linkGroup = currentSvg.append("g").attr("class", "links").attr("fill", "none");
+    const link = linkGroup.selectAll("path")
+        .data(graph.links)
+        .join("path")
+        .attr("d", d3.sankeyLinkHorizontal())
+        .attr("stroke", d => d.color)
+        .attr("stroke-width", d => getLinkWidth(d)) // <-- uses fixed or flow
+        .style("opacity", 1);
+// ---------- NODES (rects only) ----------
+    const nodeGroup = currentSvg.append("g").attr("class", "nodes");
+    const node = nodeGroup.selectAll("g")
+        .data(graph.nodes)
+        .join("g")
+        .attr("transform", d => `translate(${d.x0},${d.y0})`)
+        .style("pointer-events", "all");
+
+    node.append("rect")
+        .attr("x", 0)
+        .attr("y", d => {
+            const nodeH = d.y1 - d.y0;
+            const rectH = Math.max(7, nodeH);
+            return (nodeH - rectH) / 2;
+        })
+        .attr("height", d => {
+            const nodeH = d.y1 - d.y0;
+            return Math.max(7, nodeH);
+        })
+        .attr("width", d => d.x1 - d.x0)
+        .attr("fill", d => d.color || config.defaultNodeColor)
+        .attr("stroke", "#333333")
+        .attr("stroke-width", 1);
+
+    // ---------- LABELS (separate group, appended LAST → always fully on top) ----------
+    // ---------- LABELS (separate group, appended LAST → always fully on top) ----------
+    const labelGroup = currentSvg.append("g").attr("class", "labels");
+    labelGroup.selectAll("text")
+        .data(graph.nodes)
+        .join("text")
+        .attr("class", "node-text")
+        .attr("y", d => {
+            if (d.depth === 0 || d.depth === maxDepth) {
+                return (d.y0 + d.y1) / 2;  // left/right: vertically centered
+            }
+            // Middle columns: above node + extra shift for wrapped
+            const label = displayNames.get(d.name) || "";
+            const isWrapped = label.includes("Nordamerikanske olje- og gasselskap") ||
+                              label.includes("Europeiske industri-/energiselskap");
+            const extraShift = isWrapped ? config.labelPadding * 0.8 : 0;
+            return d.y0 - config.labelPadding - extraShift;
+        })
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${labelFontSize}px`)
+        .style("font-weight", "bold")
+        .style("fill", config.textColor)
+        .each(function(d) {
+            const textElem = d3.select(this);
+            textElem.text("");  // Clear
+
+            const label = displayNames.get(d.name) || "";
+
+            // Determine correct x position and text-anchor based on depth
+            let xPos, anchor, dyOffset;
+            if (d.depth === 0) {
+                xPos = d.x0 - config.labelPadding;
+                anchor = "end";
+                dyOffset = "0.35em";
+            } else if (d.depth === maxDepth) {
+                xPos = d.x1 + config.labelPadding;
+                anchor = "start";
+                dyOffset = "0.35em";
+            } else {
+                xPos = (d.x0 + d.x1) / 2;
+                anchor = "middle";
+                dyOffset = "0em";  // Will be adjusted per line
+            }
+
+            const isNordamerikanske = label.includes("Nordamerikanske olje- og gasselskap");
+            const isEuropeiske = label.includes("Europeiske industri-/energiselskap");
+
+            if (isNordamerikanske || isEuropeiske) {
+                // Wrapped labels (only middle columns)
+                let line1, line2;
+                if (isNordamerikanske) {
+                    line1 = "Nordamerikanske olje- og gass";
+                    line2 = "selskap";
+                } else {
+                    line1 = "Europeiske industri-/";
+                    line2 = "energiselskap";
+                }
+
+                textElem.append("tspan")
+                    .attr("x", xPos)
+                    .attr("dy", "0em")
+                    .attr("text-anchor", anchor)
+                    .text(line1);
+
+                textElem.append("tspan")
+                    .attr("x", xPos)
+                    .attr("dy", "1.2em")
+                    .attr("text-anchor", anchor)
+                    .text(line2);
+            } else {
+                // Single-line labels (left, right, and short middle)
+                textElem.append("tspan")
+                    .attr("x", xPos)
+                    .attr("dy", dyOffset)
+                    .attr("text-anchor", anchor)
+                    .text(label);
+            }
+        })
+			
+        .style("font-family", config.fontFamily)
+        .style("font-size", `${labelFontSize}px`)
+        .style("font-weight", "bold")
+        .style("fill", config.textColor)
+        .style("pointer-events", "none");  // Text doesn't block clicks — they pass to node rect below
+    // -----------------------------------------------------------------
+    // 1. PERMANENT HIGHLIGHT (click-toggle)
+    // -----------------------------------------------------------------
+    let permanentCompIds = new Set();
+    // -----------------------------------------------------------------
+    // 2. HOVER HIGHLIGHT
+    // -----------------------------------------------------------------
+    let hoverTimeout;
+    const startHover = compIdsArray => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        hoverTimeout = setTimeout(() => {
+            const compIds = new Set(compIdsArray);
+            if (!compIds.size) return;
+            link.transition().duration(150)
+                .style("stroke", l => compIds.has(l.comp_id) ? l.color : "#d9d9d9")
+                .style("opacity", l => compIds.has(l.comp_id) ? 1 : 0.3)
+                .attr("stroke-width", l => getLinkWidth(l) * (compIds.has(l.comp_id) ? 1.5 : 1));
+            node.select("rect").transition().duration(150)
+                .style("fill", n => n.compIds.some(id => compIds.has(id)) ? n.color : "#d9d9d9")
+                .style("opacity", n => n.compIds.some(id => compIds.has(id)) ? 1 : 0.4)
+                .attr("stroke-width", n => n.compIds.some(id => compIds.has(id)) ? config.nodeStrokeWidth * 2 : config.nodeStrokeWidth);
+            node.select("text").transition().duration(150)
+                .style("fill", n => n.compIds.some(id => compIds.has(id)) ? config.textColor : "#d9d9d9")
+                .style("font-weight", n => n.compIds.some(id => compIds.has(id)) ? "bolder" : "bold");
+        }, 50);
+    };
+	
+	const resetAllVisuals = () => {
+    link.transition().duration(150)
+        .style("stroke", l => l.color)
+        .style("opacity", 1)
+        .attr("stroke-width", d => getLinkWidth(d));
+
+    node.select("rect").transition().duration(150)
+        .style("fill", n => n.color || config.defaultNodeColor)
+        .style("opacity", 1)
+        .attr("stroke-width", config.nodeStrokeWidth);
+
+    node.select("text").transition().duration(150)
+        .style("fill", config.textColor)
+        .style("font-weight", "bold");
+	};
+
+	
+	const endHover = () => {
+		if (hoverTimeout) clearTimeout(hoverTimeout);
+		hoverTimeout = null;
+
+		if (permanentCompIds.size === 0) {
+			// FULL RESET: show all nodes/links in color
+			resetAllVisuals();
+		} else {
+			// Restore only permanent highlight
+			applyCurrentState();
+		}
+	};
+    // -----------------------------------------------------------------
+    // 3. APPLY CURRENT STATE (permanent only)
+    // -----------------------------------------------------------------
+    const applyCurrentState = () => {
+        const compIds = permanentCompIds;
+        link.transition().duration(150)
+            .style("stroke", l => compIds.has(l.comp_id) ? l.color : "#d9d9d9")
+            .style("opacity", l => compIds.has(l.comp_id) ? 1 : 0.3)
+            .attr("stroke-width", l => getLinkWidth(l) * (compIds.has(l.comp_id) ? 2 : 1));
+        node.select("rect").transition().duration(150)
+            .style("fill", n => n.compIds.some(id => compIds.has(id)) ? n.color : "#d9d9d9")
+            .style("opacity", n => n.compIds.some(id => compIds.has(id)) ? 1 : 0.4)
+            .attr("stroke-width", n => n.compIds.some(id => compIds.has(id)) ? config.nodeStrokeWidth * 2 : config.nodeStrokeWidth);
+        node.select("text").transition().duration(150)
+            .style("fill", n => n.compIds.some(id => compIds.has(id)) ? config.textColor : "#d9d9d9")
+            .style("font-weight", n => n.compIds.some(id => compIds.has(id)) ? "bolder" : "bold");
+    };
+    const resetPermanent = () => { permanentCompIds.clear(); applyCurrentState(); };
+    // -----------------------------------------------------------------
+    // 4. CLICK-TO-TOGGLE
+    // -----------------------------------------------------------------
+    const togglePermanent = compIdsArray => {
+        const newSet = new Set(compIdsArray);
+        if (permanentCompIds.size === newSet.size && [...permanentCompIds].every(id => newSet.has(id))) {
+            resetPermanent();
+        } else {
+            permanentCompIds = newSet;
+            applyCurrentState();
+        }
+    };
+    node.on("click", (e, d) => { e.stopPropagation(); if (d.compIds?.length) togglePermanent(d.compIds); });
+    node.select("text").on("click", (e, d) => { e.stopPropagation(); if (d.compIds?.length) togglePermanent(d.compIds); });
+    link.on("click", (e, d) => { e.stopPropagation(); if (d.comp_id) togglePermanent([d.comp_id]); });
+	currentSvg.on("click", function(e) {
+		if (e.target === currentSvg.node()) {
+			permanentCompIds.clear();
+			resetAllVisuals();  // full color reset
+		}
+	});
+
+    // -----------------------------------------------------------------
+    // 5. HOVER HANDLERS – works on rects AND on the separate labels
+    // -----------------------------------------------------------------
+    node.on("mouseover", (e, d) => { if (d.compIds?.length) startHover(d.compIds); })
+        .on("mouseout", endHover);
+
+    // Links still work exactly as before
+    link.on("mouseover", (e, d) => { if (d.comp_id) startHover([d.comp_id]); })
+        .on("mouseout", endHover);
+
+	// With this correct one:
+	currentSvg.selectAll(".node-text")   // ← note the correct class name: node-text
+		.style("pointer-events", "all")  // make sure mouse events reach the text
+		.on("mouseover", function(event, d) {
+			if (d.compIds?.length) startHover(d.compIds);
+		})
+		.on("mouseout", endHover);
+    // -----------------------------------------------------------------
+    // 7. PREVENT DRAGGING
+    // -----------------------------------------------------------------
+    node.on("mousedown", e => e.stopPropagation());
+} // ← THIS CLOSES THE renderSankey FUNCTION
+
+// -----------------------------------------------------------------
+// RESIZE & ONLOAD (outside renderSankey)
+// -----------------------------------------------------------------
+function resize() {
+    // Re-run full load to recompute responsive config
+    loadAndRenderSankey();
+}
+
+window.onload = function() {
+    loadAndRenderSankey();
+    window.addEventListener("resize", debounce(resize, 200)); // optional: debounce for performance
+};
+
+// Optional debounce to avoid too many redraws
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+</script>
+</body>
+</html>
