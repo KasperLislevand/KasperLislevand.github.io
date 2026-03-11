@@ -5,7 +5,8 @@
     "slug": "welcome",
     "summary": "An introduction to this portfolio and what you'll find here.",
     "category": "Blog",
-    "createdAt": "2026-02-22T10:00:00.000Z"
+    "createdAt": "2026-02-22T10:00:00.000Z",
+    "published": false
   },
   {
     "id": 2,
@@ -13,7 +14,8 @@
     "slug": "company-consolidation-sankey",
     "summary": "An interactive Sankey diagram showing how companies have been absorbed through mergers and acquisitions.",
     "category": "Visualization",
-    "createdAt": "2026-02-20T14:30:00.000Z"
+    "createdAt": "2026-02-20T14:30:00.000Z",
+    "published": true
   },
   {
     "id": 3,
@@ -21,7 +23,8 @@
     "slug": "design-sprint-recap",
     "summary": "Recap and outcomes from the recent design sprint.",
     "category": "Event",
-    "createdAt": "2026-01-15T09:15:00.000Z"
+    "createdAt": "2026-01-15T09:15:00.000Z",
+    "published": false
   },
   {
     "id": 4,
@@ -29,6 +32,7 @@
     "slug": "my-first-post",
     "summary": "Write your summary here.",
     "category": "Blog",
-    "createdAt": "2026-03-07T10:00:00.000Z"
+    "createdAt": "2026-03-07T10:00:00.000Z",
+    "published": false
   }
 ]
